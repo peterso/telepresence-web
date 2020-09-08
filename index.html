@@ -1,25 +1,22 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>ROS + Bootstrap 4 Demo</title>
+    <title>Robot web control</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <link rel="shortcut icon" href="./images/arm.ico">
   </head>
   <body class="bg-dark">
     <!-- Adding from tutorial -->
     <!-- VIDEO -->
     <div class="row my-4">
         <div class="col d-flex justify-content-center">
-	    <img src="/images/robotCoordinateFrames.png" width="320" height="240">
-            <img src="http://192.168.6.6:8080/stream?topic=/camera1/color/image_raw" width="320" height="240">
-	    <img src="http://192.168.6.6:8080/stream?topic=/camera2/color/image_raw" width="320" height="240">
-            <img src="" lass="p-1 bg-dark" alt="" id="video" />
+  	      <img src="./images/robotCoordinateFrames.png" width="320" height="240">
+              <img src="" width="320" height="240" lass="p-1 bg-dark" alt="cam1_OnArm" id="video_1" autoplay="true"/>
+              <img src="" width="320" height="240" lass="p-1 bg-dark" alt="cam2_Fixed" id="video_2" autoplay="true"/>
         </div>
     </div>
     <!-- SPEED -->
@@ -29,7 +26,7 @@
             <label for="robot-speed">
                 <strong>Robot speed</strong>
             </label>
-            <input type="range" min="15" max="80" class="custom-range" id="robot-speed">
+            <input type="range" min="0" max="100" class="custom-range" id="robot-speed">
         </div>
         <div class="col-md-4"></div>
     </div>
@@ -77,6 +74,6 @@
     <!-- <script src="https://static.robotwebtools.org/keyboardteleopjs/current/keyboardteleop.min.js"></script> -->
     <script src="./utils/custom_keyboardteleop.js"></script>
     <script src="./node_modules/nipplejs/dist/nipplejs.js"></script>
-    <script src="webui.js"></script>
+    <script src="./webui.js"></script>
   </body>
 </html>

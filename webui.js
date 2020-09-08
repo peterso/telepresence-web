@@ -1,15 +1,15 @@
 var twist;
 var cmdVel;
 var publishImmidiately = true;
-var robot_IP;
+var server_id;
 var manager;
 var teleop;
 var ros;
 
 function moveAction(linear, angular) {
     if (linear !== undefined && angular !== undefined) {
-        twist.linear.x = linear;
-        twist.angular.z = angular;
+        twist.linear.x = linear * teleop.scale;
+        twist.angular.z = angular * teleop.scale;
     } else {
         twist.linear.x = 0;
         twist.angular.z = 0;
@@ -55,8 +55,10 @@ function initTeleopKeyboard() {
 
     // Add event listener for slider moves
     robotSpeedRange = document.getElementById("robot-speed");
+    teleop.scale = 0.5; // default speed
     robotSpeedRange.oninput = function () {
         teleop.scale = robotSpeedRange.value / 100
+        console.log("Robot speed: ",teleop.scale);
     }
 }
 
@@ -85,8 +87,8 @@ function createJoystick() {
             }
             // convert angles to radians and scale linear and angular speed
             // adjust if youwant robot to drvie faster or slower
-            var lin = Math.cos(direction / 57.29) * nipple.distance * 0.005;
-            var ang = Math.sin(direction / 57.29) * nipple.distance * 0.05;
+            var lin = Math.cos(direction / 57.29) * nipple.distance * 0.01;
+            var ang = Math.sin(direction / 57.29) * nipple.distance * 0.01;
             // nipplejs is triggering events when joystic moves each pixel
             // we need delay between consecutive messege publications to 
             // prevent system from being flooded by messages
@@ -108,22 +110,60 @@ function createJoystick() {
 
 window.onload = function () {
     // determine robot address automatically
-    // robot_IP = location.hostname;
-    // set robot address statically
-    robot_IP = "192.168.6.6";
-    // // Init handle for rosbridge_websocket
+    server_id = self.location.hostname;
+    // also usable: server_id = document.location.hostname;
+    console.log('server id: '+server_id);
+
+    // Init handle for rosbridge_websocket i.e. connecting to ROS
     ros = new ROSLIB.Ros({
-        url: "ws://" + robot_IP + ":9090"
+        url: "ws://" + server_id + ":9090"
+    });
+
+    ros.on('connection', function() {
+      console.log('Connected via rosbridge to ' + server_id);
+    });
+
+    ros.on('error', function(error) {
+      console.log('Error connecting to server', error);
+    });
+
+    ros.on('close', function() {
+      console.log('Connection to server closed');
+    });
+
+    var cam_1_ref = new ROSLIB.Param({
+      ros : ros,
+      name : '/telepresence_web/cam_1_ref'
+    });
+
+    var cam_2_ref = new ROSLIB.Param({
+      ros : ros,
+      name : '/telepresence_web/cam_2_ref'
     });
 
     initVelocityPublisher();
-    // get handle for video placeholder
-//    video = document.getElementById('video');
-    // Populate video source 
-//    video.src = "http://localhost:8080/stream?topic=/camera/color/image_raw&type=mjpeg&quality=80";
-    // video.onload = function () {
+    // get handle for video placeholders
+    video_1 = document.getElementById('video_1');
+    video_2 = document.getElementById('video_2');
+    // Populate video sources
+    const host_id_ident = "$HOSTID"
+    const host_name_ident = "$HOSTNAME"
+    cam_1_ref.get(function(value) {
+      //value = value.replace(host_identifier, self.location.host);
+      //TODO(Alex): update src URL to pull from ROS params for camera server and camera topic name
+      video_1.src = "http://" + server_id + ":8080/stream?topic=/camera1/color/image_raw";
+      console.log('Camera 1 ref: ',value);
+    });
+    cam_2_ref.get(function(value) {
+      //TODO(Alex): update src URL to pull from ROS params for camera server and camera topic name
+      video_2.src = "http://" + server_id + ":8080/stream?topic=/camera2/color/image_raw";
+      console.log('Camera 2 ref: ',value);
+    });
+    video_1.onload = function () {
+      video_2.onload = function () {
         // joystick and keyboard controls will be available only when video is correctly loaded
         createJoystick();
         initTeleopKeyboard();
-    // };
+      };
+    };
 }
