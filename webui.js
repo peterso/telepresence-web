@@ -110,8 +110,7 @@ window.onload = function () {
     // determine robot address automatically
     // robot_IP = location.hostname;
     // set robot address statically
-//    robot_IP = "192.168.6.6";
-    robot_IP = "10.162.15.136";
+    robot_IP = "192.168.6.6";
     // // Init handle for rosbridge_websocket
     ros = new ROSLIB.Ros({
         url: "ws://" + robot_IP + ":9090"
